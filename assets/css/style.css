@@ -1,0 +1,270 @@
+/*
+  Design concept: a retailer's account "khata" (ledger book) rendered as
+  software. Aged paper, ruled rows, a cloth-bound sidebar, and rubber-stamp
+  status badges — because that is the literal mental model a recharge
+  retailer already uses every day.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root {
+    --paper: #EFE8D5;
+    --paper-alt: #F8F3E6;
+    --ink: #241F1B;
+    --ink-soft: #665D4E;
+    --rule: #DCD0AD;
+    --rule-strong: #BCA876;
+    --ledger-green: #1F4D3A;
+    --ledger-green-dark: #143229;
+    --ledger-tint: #E4EDE7;
+    --brass: #A9813E;
+    --stamp-success: #2F7A4D;
+    --stamp-pending: #B5790C;
+    --stamp-failed: #A83232;
+    --shadow: rgba(36, 31, 27, 0.14);
+    --font-display: 'Roboto Slab', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+a { color: var(--ledger-green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0 0 .4em; color: var(--ink); }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1rem; }
+
+.eyebrow {
+    font-family: var(--font-body);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: .3rem;
+    display: block;
+}
+
+/* ---------- App shell (sidebar + main) ---------- */
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: var(--ledger-green);
+    color: var(--paper-alt);
+    padding: 1.6rem 1.3rem;
+    position: relative;
+    border-right: 3px solid var(--brass);
+}
+
+.sidebar::before {
+    /* binding holes, like a cloth ledger spine */
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 10px;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, transparent 0 18px, rgba(248,243,230,.25) 18px 20px);
+}
+
+.brand {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    margin-bottom: .1rem;
+}
+.brand small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-top: .25rem;
+}
+
+.wallet-chip {
+    margin: 1.4rem 0;
+    padding: .8rem .9rem;
+    background: rgba(248, 243, 230, 0.08);
+    border: 1px solid rgba(248, 243, 230, 0.2);
+    border-radius: 3px;
+}
+.wallet-chip .label { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.wallet-chip .amount { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 600; margin-top: .15rem; }
+
+nav.main-nav { margin-top: 1.2rem; display: flex; flex-direction: column; gap: .1rem; }
+nav.main-nav a {
+    color: var(--paper-alt);
+    padding: .55rem .6rem;
+    border-radius: 3px;
+    font-size: .9rem;
+    opacity: .85;
+}
+nav.main-nav a:hover { background: rgba(248,243,230,.08); text-decoration: none; opacity: 1; }
+nav.main-nav a.active { background: rgba(248,243,230,.14); opacity: 1; font-weight: 600; border-left: 3px solid var(--brass); padding-left: calc(.6rem - 3px); }
+
+.sidebar-footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid rgba(248,243,230,.2); font-size: .82rem; }
+.sidebar-footer a { color: var(--paper-alt); opacity: .75; }
+
+main.content { flex: 1; padding: 2rem 2.4rem; max-width: 1100px; }
+
+/* ---------- Cards & stats ---------- */
+.card {
+    background: var(--paper-alt);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 1px 0 var(--shadow);
+}
+
+.stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+.stat-card {
+    flex: 1; min-width: 200px;
+    background: var(--paper-alt);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--ledger-green);
+    border-radius: 2px;
+    padding: 1rem 1.2rem;
+}
+.stat-card .value { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 600; margin-top: .2rem; }
+.stat-card .sub { font-size: .78rem; color: var(--ink-soft); margin-top: .2rem; }
+
+/* ---------- Ledger table ---------- */
+table.ledger { width: 100%; border-collapse: collapse; }
+table.ledger th {
+    text-align: left;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    padding: .5rem .6rem;
+    border-bottom: 2px solid var(--rule-strong);
+}
+table.ledger td {
+    padding: .65rem .6rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: middle;
+}
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger td.num, table.ledger th.num { font-family: var(--font-mono); text-align: right; }
+table.ledger td.mono { font-family: var(--font-mono); }
+table.ledger tr:hover td { background: rgba(31, 77, 58, 0.035); }
+
+/* Rubber-stamp status badge */
+.stamp {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .68rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    padding: .18rem .6rem;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    transform: rotate(-3deg);
+}
+.stamp-success, .stamp-approved, .stamp-active { color: var(--stamp-success); background: rgba(47,122,77,.08); }
+.stamp-failed, .stamp-rejected, .stamp-blocked { color: var(--stamp-failed); background: rgba(168,50,50,.08); }
+.stamp-pending { color: var(--stamp-pending); background: rgba(181,121,12,.08); }
+
+/* ---------- Forms ---------- */
+.field { margin-bottom: 1.1rem; }
+.field label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: .3rem;
+}
+.field input, .field select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: .95rem;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--rule-strong);
+    padding: .5rem .1rem;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--ledger-green); }
+.field .hint { font-size: .76rem; color: var(--ink-soft); margin-top: .3rem; }
+
+.btn {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: .88rem;
+    letter-spacing: .03em;
+    padding: .7rem 1.5rem;
+    border-radius: 2px;
+    border: 2px solid var(--ledger-green);
+    cursor: pointer;
+}
+.btn-primary { background: var(--ledger-green); color: var(--paper-alt); }
+.btn-primary:hover { background: var(--ledger-green-dark); text-decoration: none; }
+.btn-ghost { background: transparent; color: var(--ledger-green); }
+.btn-ghost:hover { background: var(--ledger-tint); text-decoration: none; }
+.btn-danger { border-color: var(--stamp-failed); color: var(--stamp-failed); background: transparent; }
+.btn-danger:hover { background: rgba(168,50,50,.08); text-decoration: none; }
+.btn-sm { padding: .35rem .8rem; font-size: .76rem; }
+
+/* ---------- Notices / flash messages ---------- */
+.notice { padding: .7rem 1rem; border-radius: 2px; margin-bottom: 1rem; font-size: .9rem; border-left: 4px solid; }
+.notice-success { background: rgba(47,122,77,.08); border-color: var(--stamp-success); color: var(--stamp-success); }
+.notice-error { background: rgba(168,50,50,.08); border-color: var(--stamp-failed); color: var(--stamp-failed); }
+.notice-info { background: var(--ledger-tint); border-color: var(--ledger-green); color: var(--ledger-green-dark); }
+
+/* ---------- Auth pages (login/register) ---------- */
+.auth-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--paper-alt);
+    border: 1px solid var(--rule);
+    border-top: 4px solid var(--brass);
+    border-radius: 3px;
+    padding: 2.2rem 2rem;
+    box-shadow: 0 4px 24px var(--shadow);
+}
+.auth-card .brand { color: var(--ledger-green); text-align: center; margin-bottom: .2rem; }
+.auth-card .tagline { text-align: center; color: var(--ink-soft); font-size: .85rem; margin-bottom: 1.6rem; }
+.auth-card form { margin-top: 1.2rem; }
+.auth-card .btn { width: 100%; text-align: center; }
+.auth-switch { text-align: center; margin-top: 1.2rem; font-size: .88rem; color: var(--ink-soft); }
+
+/* ---------- Misc ---------- */
+.pill { display: inline-block; padding: .15rem .55rem; border-radius: 10px; font-size: .74rem; background: var(--ledger-tint); color: var(--ledger-green-dark); }
+.text-muted { color: var(--ink-soft); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .6rem; }
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--ink-soft); }
+
+@media (max-width: 780px) {
+    .app-shell { flex-direction: column; }
+    .sidebar { width: auto; border-right: none; border-bottom: 3px solid var(--brass); }
+    main.content { padding: 1.4rem; }
+}
